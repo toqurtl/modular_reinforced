@@ -6,8 +6,8 @@ import csv
 
 # type = duration in site
 class UnitType(Enum):
-    A = 3
-    B = 4
+    A = ('A', 3)
+    B = ('B', 4)
 
     @classmethod
     def get_type(cls, unit_type):
@@ -39,7 +39,7 @@ class Location(Enum):
 
 class Unit(Agent):
     def __init__(self, unit_type_enum, model):
-        unit_id = next(model.unit_id_generator())
+        unit_id = next(model.unit_id_generator)
         super().__init__(unit_id, model)
         self.type = unit_type_enum
         self.site_working = True
@@ -48,11 +48,13 @@ class Unit(Agent):
         self.install_start_step = 0
 
     def __str__(self):
-        return UnitType.name(self.type)
+        type_name, _ = self.type.value
+        return self.unique_id +'('+type_name +')'
 
     @property
     def duration(self):
-        return self.type.value
+        _, duration = self.type.value
+        return duration
 
     @property
     def install_finish_step(self):

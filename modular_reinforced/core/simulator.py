@@ -12,7 +12,7 @@ class MesaModel(Model):
         self.inventory = InventoryAgent(self)
         self.factory = FactoryAgent(self)
         self.schedule.add(self.inventory)
-        self.schedule.add(self.factory)
+        # self.schedule.add(self.factory)
 
         self.running = True
 
@@ -41,6 +41,15 @@ class MesaModel(Model):
     def time_step(self):
         return self.schedule.steps
 
+    @property
+    def episode_finished(self):
+        finished = True
+        for site_agent in self.site_schedule.agents:
+            if not site_agent.project_finished:
+                finished = False
+                break
+        return finished
+
     def add_site_agent(self, site_agent):
         if len(self.site_schedule.agents) >= self.max_site:
             print('number of site_list have to be smaller than max site of the model')
@@ -63,8 +72,13 @@ class MesaModel(Model):
         pass
 
     def step(self):
-        print('time:',self.time_step)
-
+        self.factory.step()
         self.site_schedule.step()
         self.schedule.step()
         self.execute_event()
+
+    # for reinforcement learning
+    def action(self, unit_type):
+        if unit_type is not None:
+            self.register_production(unit_type)
+
