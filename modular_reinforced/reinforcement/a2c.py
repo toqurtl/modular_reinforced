@@ -1,5 +1,5 @@
 import sys
-import pylab
+# import pylab
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
@@ -149,8 +149,8 @@ if __name__ == "__main__":
                 score = score if score == 500.0 else score + 100
                 scores.append(score)
                 episodes.append(e)
-                pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/cartpole_a2c.png")
+                # pylab.plot(episodes, scores, 'b')
+                # pylab.savefig("./save_graph/cartpole_a2c.png")
                 print("episode:", e, "  score:", score)
 
                 # 이전 10개 에피소드의 점수 평균이 490보다 크면 학습 중단

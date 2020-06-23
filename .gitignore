@@ -1,4 +1,5 @@
-/data/*
+/sample_data/*
 playground.py
+playground_reinforced.py
 sample_code.py
 *.egg-info
