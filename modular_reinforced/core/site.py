@@ -47,6 +47,23 @@ class SiteAgent(Agent):
     def project_finished(self):
         return len(self.unit_schedule) == self.unit_schedule_index
 
+    @property
+    def __is_working(self):
+        return len(self.units_in_the_site['install']) == 0
+
+    @property
+    def remaining_planned_duration(self):
+        return self.planned_duration - self.model.time_step
+
+
+    @property
+    def start_step(self):
+        return self.model.stie_schedule.steps
+
+    @property
+    def finish_step(self):
+        return self.start_step + self.planned_duration
+
     def __remained_unit_string(self):
         return_str = ''
         for key, value in self.remained_unit_dict.items():
@@ -64,13 +81,7 @@ class SiteAgent(Agent):
             self.units_in_the_site['wait'].remove(unit)
         return selected_unit
 
-    @property
-    def start_step(self):
-        return self.model.stie_schedule.steps
 
-    @property
-    def finish_step(self):
-        return self.start_step + self.planned_duration
 
     @property
     def requested_unit(self):

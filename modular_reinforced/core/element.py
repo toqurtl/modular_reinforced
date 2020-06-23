@@ -4,10 +4,10 @@ import logging
 import csv
 
 
-# type = duration in site
 class UnitType(Enum):
-    A = ('A', 3)
-    B = ('B', 4)
+    # unit_type_name, duration
+    A = ('A', 5)
+    B = ('B', 10)
 
     @classmethod
     def get_type(cls, unit_type):

@@ -80,5 +80,17 @@ class MesaModel(Model):
     # for reinforcement learning
     def action(self, unit_type):
         if unit_type is not None:
-            self.register_production(unit_type)
+            self.factory.register_production(unit_type)
+
+    def state(self):
+        # number of inventory units, required unit for site, remained duration
+        # number of inventory units
+        print(str(self.time_step) + '=====================')
+        print(self.inventory.num_unit_per_type())
+        # required unit for site
+        for site_agent in self.site_schedule.agents:
+            print(site_agent.unit_schedule[site_agent.unit_schedule_index])
+            print(site_agent.remaining_planned_duration)
+
+        pass
 

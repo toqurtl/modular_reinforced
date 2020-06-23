@@ -30,6 +30,12 @@ class InventoryAgent(Agent):
     def num_unit(self, unit_type):
         return len(self.inventory[unit_type])
 
+    def num_unit_per_type(self):
+        num_unit_list = []
+        for unit_type in self.inventory.keys():
+            num_unit_list.append(len(self.inventory[unit_type]))
+        return num_unit_list
+
     def __inventory_str(self):
         return_str = ''
         for key, value in self.inventory.items():

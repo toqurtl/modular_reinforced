@@ -25,9 +25,9 @@ class FactoryAgent(Agent):
                       +':: production start '+ type_name)
 
     def step(self):
-        # if self.model.time_step % 10 == 5:
-        #     self.register_production(UnitType.A)
-        # elif self.model.time_step % 10 == 0:
-        #     self.register_production(UnitType.B)
+        if self.model.time_step % 10 == 5:
+            self.register_production(UnitType.A)
+        elif self.model.time_step % 10 == 0:
+            self.register_production(UnitType.B)
         return
 
