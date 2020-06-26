@@ -20,13 +20,16 @@ class InventoryAgent(Agent):
         self.trailer_capacity = self.model.cfg.trailer_capacity
 
         # for simulation
-        self.request_dict_in_step = {}
-        self.request_from_sites_list = []
 
     def __set_inventory(self):
         self.inventory = {}
+        self.request_dict_in_step = {}
+        self.request_from_sites_list = []
         for type_idx in self.model.unit_type_info_dict.keys():
             self.inventory[type_idx] = []
+
+    def reset(self):
+        self.__set_inventory()
 
     @property
     def num_unit(self, type_idx):
@@ -85,7 +88,7 @@ class InventoryAgent(Agent):
             return_str += str(type_idx) + ': ' + str(len(unit_list)) + ', '
         return return_str
 
-    def logging(self):
+    def logging_state(self):
         self.log.info('t_' + str(self.model.time_step) + '::STATUS::' + self.unique_id + '::' \
                       + 'storage status is '+ self.__inventory_str())
         # self.log.info('t_' + str(self.model.time_step) + '::STATUS::' + self.unique_id + \
@@ -98,11 +101,12 @@ class InventoryAgent(Agent):
     def logging_delivery_start(self, site, unit):
         self.log.info('t_' + str(self.model.time_step) + '::EVENT::' + self.unique_id + '::' \
                       + str(unit) + ' start to move to ' + site.unique_id)
+
     # step
     def step(self):
         self.delivery()
         random.shuffle(self.request_from_sites_list)
-        # self.logging()
+        self.logging_state()
 
 
 

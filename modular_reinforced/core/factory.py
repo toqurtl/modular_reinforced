@@ -12,8 +12,12 @@ class FactoryAgent(Agent):
         if not self.log.handlers:
             self.log.setLevel(logging.INFO)
             self.log.addHandler(logging.StreamHandler())
-        self.production_schedule = []
         self.unit_type_info_dict = model.unit_type_info_dict
+
+        self.production_schedule = []
+
+    def reset(self):
+        pass
 
     # Event: product unit
     def product_unit(self, type_idx):

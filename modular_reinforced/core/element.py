@@ -15,9 +15,13 @@ class Unit(Agent):
         self.installed = False
         # self.location = Location.Factory
         self.install_start_step = 0
+        self.model.constructed_unit_list.append(self)
 
     def __str__(self):
         return self.unique_id +'('+str(self.type_idx) +')'
+
+    def __del__(self):
+        pass
 
     @property
     def duration(self):

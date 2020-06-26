@@ -1,33 +1,16 @@
 from modular_reinforced.core.simulator import MesaModel
-import modular_reinforced.core.utils as utils
-from modular_reinforced.core.site import SiteAgent
-from modular_reinforced.core.inventory import InventoryAgent
-from modular_reinforced.core.factory import FactoryAgent
-from modular_reinforced.core.element import UnitType
-import csv
-import logging
-sample_model = MesaModel(max_site=15, max_step=500)
+from config import Config
+import os
 
-with open('../sample_data/site_unit_schedule.csv', 'r') as f:
-    f_reader = csv.reader(f)
-    site_unit_schedule_list = []
-    for idx, row_list in enumerate(f_reader):
-        unit_schedule_list = []
-        if idx != 0:
-            for unit_type in row_list:
-                unit_schedule_list.append(UnitType.get_type(unit_type))
-            site_unit_schedule_list.append(unit_schedule_list)
+EPISODES = 10
+abs_path = os.path.dirname(os.path.realpath('.'))
+data_path = os.path.join(abs_path, "sample_data")
+cfg_file_path = os.path.join(data_path, "default.cfg")
 
-for site_unit_schedule in site_unit_schedule_list:
-    sample_model.add_site_agent(SiteAgent(100, sample_model, activate=True, unit_schedule=site_unit_schedule))
+with open(cfg_file_path, 'r') as f:
+    cfg = Config(f)
+
+sample_model = MesaModel(data_path, cfg)
+sample_model.simulate_episode()
 
 
-
-# for i in range(0, 1000):
-#     sample_model.step()
-while not sample_model.episode_finished:
-    if sample_model.time_step % 10 == 5:
-        sample_model.factory.register_production(UnitType.A)
-    elif sample_model.time_step % 10 == 0:
-        sample_model.factory.register_production(UnitType.B)
-    sample_model.step()

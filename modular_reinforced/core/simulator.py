@@ -10,41 +10,59 @@ import os
 
 
 class MesaModel(Model):
+
     def __init__(self, data_path, cfg):
         # get required information from cfg
         self.cfg = cfg
         self.max_site = int(cfg.max_num_of_site)
         self.max_step = int(cfg.max_step)
-        unit_info_path = os.path.join(data_path, cfg.unit_json_file_path)
-        site_info_path = os.path.join(data_path, cfg.site_json_file_path)
+        self.unit_info_path = os.path.join(data_path, cfg.unit_json_file_path)
+        self.site_info_path = os.path.join(data_path, cfg.site_json_file_path)
+
+        # get component information from json
         self.unit_type_info_dict = {}
-        with open(unit_info_path, "r") as unit_info_file:
+        self.site_agent_list = []
+        self.__read_component_from_json()
+
+        # baseline for simulation
+        self.inventory = InventoryAgent(self)
+        self.factory = FactoryAgent(self)
+        self.reinforcement_env = False
+        self.__initialize()
+
+    def __initialize(self):
+
+        self.site_schedule = BaseScheduler(self)
+        self.schedule = BaseScheduler(self)
+        self.event_list = [] # reserved event list (function, argument, execution time step)
+        self.constructed_unit_list = []
+        self.unit_id_generator = utils.unit_id_generator()
+        self.__scheduling_site_agents()
+
+    # for initialization
+    def reset(self):
+        self.__initialize()
+        self.factory.reset()
+        self.inventory.reset()
+        for site_agent in self.site_agent_list:
+            site_agent.reset()
+
+    def __read_component_from_json(self):
+        with open(self.unit_info_path, "r") as unit_info_file:
             unit_type_info_list = json.load(unit_info_file).get("unit_types")
             for unit_type_info in unit_type_info_list:
                 key = unit_type_info.get("type_idx")
                 self.unit_type_info_dict[key] = unit_type_info
 
-        with open(site_info_path, "r") as site_info_file:
-            self.site_info_list = json.load(site_info_file).get("sites")
+        with open(self.site_info_path, "r") as site_info_file:
+            site_info_list = json.load(site_info_file).get("sites")
 
-        # baseline for simulation
-        self.schedule = BaseScheduler(self)
-        self.site_schedule = BaseScheduler(self)
-        self.inventory = InventoryAgent(self)
-        self.factory = FactoryAgent(self)
-        self.schedule.add(self.inventory)
-        self.reinforcement_env = False
-        self.__generate_site_agents()
+        for site_info in site_info_list:
+            self.site_agent_list.append(SiteAgent(self, **site_info))
 
-        # simulation handlers
-        # reserved event list (function, argument, execution time step)
-        self.event_list = []
-        self.unit_id_generator = utils.unit_id_generator()
-
-    # for initialization
-    def __generate_site_agents(self):
-        for site_info in self.site_info_list:
-            self.add_site_agent(SiteAgent(self, **site_info))
+    def __scheduling_site_agents(self):
+        for site_agent in self.site_agent_list:
+            self.site_schedule.add(site_agent)
 
     # event managing function
     def register_event(self, func, args, time_interval):
@@ -80,17 +98,11 @@ class MesaModel(Model):
     def state_space(self):
         return
 
-    def add_site_agent(self, site_agent):
-        if len(self.site_schedule.agents) >= self.max_site:
-            print('number of site_list have to be smaller than max site of the model')
-            exit()
-        else:
-            self.site_schedule.add(site_agent)
-
     def step(self):
+        self.schedule.step()
         self.factory.step()
         self.site_schedule.step()
-        self.schedule.step()
+        self.inventory.step()
         self.execute_event()
 
     # for reinforcement learning
@@ -111,3 +123,4 @@ class MesaModel(Model):
     def simulate_episode(self):
         while not self.episode_finished:
             self.step()
+

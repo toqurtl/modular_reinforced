@@ -15,31 +15,37 @@ class SiteAgent(Agent):
 
         # set site from cfg
         self.unit_schedule_origin = kwargs.get("unit_schedule")
-        self.unit_schedule = deque(self.unit_schedule_origin)
-        self.unit_schedule_index = 0
         self.planned_duration = kwargs.get("planned_duration")
         self.start_time_step = kwargs.get("start_time_step")
         self.logistic_interval = kwargs.get("logistic_interval")
         self.request_condition_num_unit = kwargs.get("request_condition")
-        self.remained_unit_dict = {}
-        self.__initialize()
-        self.request_unit_type = 0
+
         # simulation
-        # self.is_working = False
         self.units_in_the_site = {
             'wait': [],
             'install': [],
             'finish': []
         }
+        self.remained_unit_dict = {}
+        self.__initialize()
 
     def __initialize(self):
         # set remained_unit_dict
+        self.unit_schedule = deque(self.unit_schedule_origin)
+        self.request_unit_type = 0
+        self.cost = 0
         for type_idx in self.model.unit_type_info_dict.keys():
             self.remained_unit_dict[type_idx] = 0
 
         for type_idx in self.unit_schedule_origin:
             if type_idx in self.remained_unit_dict.keys():
                 self.remained_unit_dict[type_idx] += 1
+
+        for unit_list in self.units_in_the_site.values():
+            unit_list.clear()
+
+    def reset(self):
+        self.__initialize()
 
     @property
     def is_request(self):
@@ -168,5 +174,5 @@ class SiteAgent(Agent):
     def step(self):
         if not self.project_finished and self.project_started:
             self.work()
-            # self.logging_state()
+            self.logging_state()
 
