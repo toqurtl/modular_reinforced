@@ -32,8 +32,11 @@ class InventoryAgent(Agent):
         self.__set_inventory()
 
     @property
-    def num_unit(self, type_idx):
-        return len(self.inventory[type_idx])
+    def num_unit(self):
+        num_unit = 0
+        for unit_list in self.inventory.values():
+            num_unit += len(unit_list)
+        return num_unit
 
     @property
     def num_request(self):
@@ -67,6 +70,7 @@ class InventoryAgent(Agent):
             # self.logging_delivery_start(site, unit)
             self.inventory[type_idx].remove(unit)
             self.request_from_sites_list.remove(args)
+            self.model.reward_at_time_step += 1
             return
         else:
             return
@@ -106,7 +110,8 @@ class InventoryAgent(Agent):
     def step(self):
         self.delivery()
         random.shuffle(self.request_from_sites_list)
-        self.logging_state()
+        self.model.inventory_total += self.num_unit
+        # self.logging_state()
 
 
 

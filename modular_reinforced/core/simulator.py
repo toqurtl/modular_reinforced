@@ -7,6 +7,7 @@ import modular_reinforced.core.utils as utils
 import numpy as np
 import json
 import os
+from random import randint
 
 
 class MesaModel(Model):
@@ -31,13 +32,19 @@ class MesaModel(Model):
         self.__initialize()
 
     def __initialize(self):
-
         self.site_schedule = BaseScheduler(self)
         self.schedule = BaseScheduler(self)
         self.event_list = [] # reserved event list (function, argument, execution time step)
         self.constructed_unit_list = []
         self.unit_id_generator = utils.unit_id_generator()
         self.__scheduling_site_agents()
+
+        # final result
+        self.finished_time_step = 0
+        self.inventory_total = 0
+
+        # for reinforcement_learning
+        self.reward_at_time_step = 0
 
     # for initialization
     def reset(self):
@@ -91,14 +98,11 @@ class MesaModel(Model):
         return finished
 
     @property
-    def action_space(self):
-        return len(self.unit_type_info_dict.items())
-
-    @property
     def state_space(self):
         return
 
     def step(self):
+        self.reward_at_time_step = 0
         self.schedule.step()
         self.factory.step()
         self.site_schedule.step()
@@ -106,11 +110,9 @@ class MesaModel(Model):
         self.execute_event()
 
     # for reinforcement learning
-    def action(self, type_idx):
-        self.factory.register_production(type_idx)
-
+    @property
     def action_size(self):
-        return len(self.unit_type_info_dict.list())
+        return len(self.unit_type_info_dict.items()) + 1
 
     def state(self):
         inven_state = self.inventory.num_unit_per_type()
@@ -118,7 +120,17 @@ class MesaModel(Model):
         for site_agent in self.site_schedule.agents:
             site_state += site_agent.get_state()
         state = inven_state + site_state
-        return len(state), np.array(state)
+        return np.array(state)
+
+    def next(self, action):
+        # type_idx = randint(1,2)
+        if self.reinforcement_env:
+            self.factory.register_production(action)
+        self.step()
+        return self.state(), self.reward(), self.episode_finished
+
+    def reward(self):
+        return self.reward_at_time_step
 
     def simulate_episode(self):
         while not self.episode_finished:

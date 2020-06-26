@@ -75,7 +75,7 @@ class SiteAgent(Agent):
 
     @property
     def remaining_planned_duration(self):
-        return self.planned_duration - self.model.time_step
+        return self.planned_duration + self.start_time_step - self.model.time_step
 
     @property
     def start_step(self):
@@ -124,6 +124,7 @@ class SiteAgent(Agent):
         self.units_in_the_site["finish"].append(self.working_unit)
         self.request_unit_type=0
         # self.logging_install_finish()
+        self.model.reward_at_time_step += 1
 
     # if is_working and finished, request another
     def work(self):
@@ -174,5 +175,5 @@ class SiteAgent(Agent):
     def step(self):
         if not self.project_finished and self.project_started:
             self.work()
-            self.logging_state()
+            # self.logging_state()
 

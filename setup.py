@@ -69,10 +69,10 @@ setup(
         'pandas',
         'config',
         'mesa',
-        'networkx',
-        'tensorflow',
-        'keras',
-        'numpy'
+        'tensorflow==1.15',
+        'keras==2.3.1',
+        'numpy',
+        'gym'
         ],
 
     # List additional groups of dependencies here (e.g. development

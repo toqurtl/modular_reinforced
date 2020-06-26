@@ -1,7 +1,6 @@
 from mesa.agent import Agent
 from modular_reinforced.core.element import Unit
 import logging
-import numpy as np
 
 
 class FactoryAgent(Agent):
@@ -13,7 +12,6 @@ class FactoryAgent(Agent):
             self.log.setLevel(logging.INFO)
             self.log.addHandler(logging.StreamHandler())
         self.unit_type_info_dict = model.unit_type_info_dict
-
         self.production_schedule = []
 
     def reset(self):
@@ -25,6 +23,7 @@ class FactoryAgent(Agent):
         unit = Unit(self.model, **type_info)
         self.model.inventory.add_unit(unit)
         # self.logging_production_finished(unit)
+        self.model.reward_at_time_step -= 1
 
     # Event register:
     def register_production(self, type_idx):
@@ -32,7 +31,8 @@ class FactoryAgent(Agent):
             pass
             # self.logging_factory_idle()
         else:
-            self.model.register_event(self.product_unit, type_idx, 3)
+            unit_info = self.unit_type_info_dict.get(type_idx)
+            self.model.register_event(self.product_unit, type_idx, unit_info.get("production_duration"))
             # self.logging_production_start(type_idx)
 
     # for logging
