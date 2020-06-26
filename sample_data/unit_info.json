@@ -1,0 +1,14 @@
+{
+  "unit_types": [
+    {
+      "unit_type": "A",
+      "type_idx": 1,
+      "install_duration": 3
+    },
+    {
+      "unit_type": "B",
+      "type_idx": 2,
+      "install_duration": 4
+    }
+  ]
+}

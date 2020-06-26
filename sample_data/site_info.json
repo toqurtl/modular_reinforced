@@ -1,0 +1,36 @@
+{
+  "sites": [
+    {
+      "site_id": "site_1",
+      "planned_duration": 400,
+      "start_time_step": 50,
+      "unit_schedule": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      "logistic_interval": 5,
+      "request_condition": 1
+    },
+    {
+      "site_id": "site_2",
+      "planned_duration": 500,
+      "start_time_step": 400,
+      "unit_schedule": [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+      "logistic_interval": 5,
+      "request_condition": 1
+    },
+    {
+      "site_id": "site_3",
+      "planned_duration": 300,
+      "start_time_step": 400,
+      "unit_schedule": [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
+      "logistic_interval": 5,
+      "request_condition": 1
+    },
+    {
+      "site_id": "site_4",
+      "planned_duration": 300,
+      "start_time_step": 400,
+      "unit_schedule": [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
+      "logistic_interval": 5,
+      "request_condition": 1
+    }
+  ]
+}

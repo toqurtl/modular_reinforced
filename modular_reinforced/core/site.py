@@ -1,60 +1,75 @@
 from mesa.agent import Agent
-from modular_reinforced.core.element import UnitType
+from collections import deque
 import logging
-request_capacity = 1
+import numpy as np
 
 
 class SiteAgent(Agent):
-    def __init__(self, planned_duration, model, activate=False, unit_schedule=[]):
-        site_id = next(model.site_id_generator)
-        super().__init__(site_id, model)
+    def __init__(self, model, **kwargs):
+
+        super().__init__(kwargs.get("site_id"), model)
         self.log = logging.getLogger(self.unique_id)
         if not self.log.handlers:
             self.log.setLevel(logging.INFO)
             self.log.addHandler(logging.StreamHandler())
 
-        self.activate = activate
-        # unit_schedule is unit_type list
-        self.unit_schedule = unit_schedule
+        # set site from cfg
+        self.unit_schedule_origin = kwargs.get("unit_schedule")
+        self.unit_schedule = deque(self.unit_schedule_origin)
         self.unit_schedule_index = 0
+        self.planned_duration = kwargs.get("planned_duration")
+        self.start_time_step = kwargs.get("start_time_step")
+        self.logistic_interval = kwargs.get("logistic_interval")
+        self.request_condition_num_unit = kwargs.get("request_condition")
         self.remained_unit_dict = {}
-
-        self.is_working = False
-
+        self.__initialize()
+        self.request_unit_type = 0
+        # simulation
+        # self.is_working = False
         self.units_in_the_site = {
             'wait': [],
             'install': [],
             'finish': []
         }
 
-        self.planned_duration = planned_duration
-        self.installed_unit = []
-        self.arrived_unit = []
+    def __initialize(self):
+        # set remained_unit_dict
+        for type_idx in self.model.unit_type_info_dict.keys():
+            self.remained_unit_dict[type_idx] = 0
 
-        self.logistic_interval = 4
+        for type_idx in self.unit_schedule_origin:
+            if type_idx in self.remained_unit_dict.keys():
+                self.remained_unit_dict[type_idx] += 1
 
-        self.working_unit = None
+    @property
+    def is_request(self):
+        return self.request_unit_type != 0
 
-        self.is_request = False
+    @property
+    def request_condition(self):
+        return len(self.units_in_the_site["wait"]) < self.request_condition_num_unit
 
-        for unit_type in unit_schedule:
-            if unit_type in self.remained_unit_dict.keys():
-                self.remained_unit_dict[unit_type] += 1
-            else:
-                self.remained_unit_dict[unit_type] = 1
-
+    @property
+    def project_started(self):
+        return self.start_time_step <= self.model.time_step
     @property
     def project_finished(self):
-        return len(self.unit_schedule) == self.unit_schedule_index
+        return len(list(self.unit_schedule)) == 0
 
     @property
-    def __is_working(self):
-        return len(self.units_in_the_site['install']) == 0
+    def is_working(self):
+        return len(self.units_in_the_site['install']) != 0
+
+    @property
+    def working_unit(self):
+        if self.is_working:
+            return self.units_in_the_site['install'][0]
+        else:
+            return None
 
     @property
     def remaining_planned_duration(self):
         return self.planned_duration - self.model.time_step
-
 
     @property
     def start_step(self):
@@ -66,65 +81,92 @@ class SiteAgent(Agent):
 
     def __remained_unit_string(self):
         return_str = ''
-        for key, value in self.remained_unit_dict.items():
-            type_name, _ = key.value
-            return_str += type_name + ': ' + str(value) + ', '
+        for type_id, value in self.remained_unit_dict.items():
+            return_str += str(type_id) + ': ' + str(value) + ', '
         return return_str
 
-    def get_unit_from_arrived(self, unit_type):
-        selected_unit = None
+    def remained_unit_info(self):
+        return list(self.remained_unit_dict.values())
+
+    # check there is request unit. if there is, return selected_unit
+    def get_unit_from_arrived(self):
+        unit_arrived, selected_unit = False, None
         for unit in self.units_in_the_site['wait']:
-            if unit.type == unit_type:
-                selected_unit = unit
+            if unit.type_idx == self.request_unit_type:
+                selected_unit, unit_arrived = unit, True
                 break
-        if selected_unit is not None:
-            self.units_in_the_site['wait'].remove(unit)
-        return selected_unit
+        return unit_arrived, selected_unit
 
+    def request_unit(self):
+        self.model.inventory.request_from_sites_list.append((self, self.request_unit_type))
 
+    def unit_to_wait(self, unit):
+        self.units_in_the_site["wait"].append(unit)
 
-    @property
-    def requested_unit(self):
-        # if the number of remained unit is smaller than request_capacity,
-        if len(self.unit_schedule) > request_capacity:
-            return self.unit_schedule[-request_capacity:]
-        else:
-            return self.unit_schedule
+    def unit_to_install(self):
+        unit_arrived, selected_unit = self.get_unit_from_arrived()
+        unit_moved = unit_arrived and not self.is_working
+        if unit_moved:
+            self.units_in_the_site["wait"].remove(selected_unit)
+            self.units_in_the_site["install"].append(selected_unit)
 
-    def request_unit(self, unit):
-        self.model.inventory.request_from_sites_list.append((self, unit))
-        self.log.info('t_' + str(self.model.time_step) + '::EVENT::' + self.unique_id \
-                      + '::request new unit to inventory')
+        return unit_moved, unit_arrived
+
+    def unit_to_finish(self):
+        self.remained_unit_dict[self.working_unit.type_idx] -= 1
+        self.units_in_the_site["install"].remove(self.working_unit)
+        self.units_in_the_site["finish"].append(self.working_unit)
+        self.request_unit_type=0
+        # self.logging_install_finish()
 
     # if is_working and finished, request another
     def work(self):
         if self.is_working:
+            # if finished, request new unit
             if self.model.time_step == self.unit_work_finish_step:
-                self.remained_unit_dict[self.working_unit.type] -= 1
-                self.working_unit = None
-                self.is_working = False
-                self.is_request = False
-                self.unit_schedule_index += 1
+                self.unit_to_finish()
+
         else:
-            request_unit_type = self.unit_schedule[self.unit_schedule_index]
-            selected_unit = self.get_unit_from_arrived(request_unit_type)
-            if selected_unit is not None:
-                self.working_unit = selected_unit
+            # if request_condition(there are inefficient unit on wait state) and not request yet, request unit
+            if self.request_condition and not self.is_request:
+                self.request_unit_type = self.unit_schedule.popleft()
+                if self.request_unit_type == 0:
+                    self.log.debug('site_class:error')
+                    exit()
+                self.request_unit()
+
+            # if not working, try to move wait unit to install
+            unit_moved, unit_arrived = self.unit_to_install()
+            if unit_moved:
                 self.unit_work_start_step = self.model.time_step
                 self.unit_work_finish_step = self.model.time_step + self.working_unit.duration
-                self.is_working = True
-            else:
-                if not self.is_request:
-                    self.request_unit(self.unit_schedule[self.unit_schedule_index])
-                    self.is_request = True
+                # self.logging_install_start()
 
-    def print_state(self):
+    def get_state(self):
+        required_unit = [self.request_unit_type]
+        remaining_planned_duration = [self.remaining_planned_duration]
+        remained_unit_list = self.remained_unit_info()
+        return required_unit + remaining_planned_duration + remained_unit_list
+
+    # for logging
+    def logging_state(self):
         self.log.info('t_' + str(self.model.time_step) + '::STATUS::' + self.unique_id + ':: working unit is ' \
                       + str(self.working_unit) + ' remained_unit is '+ self.__remained_unit_string())
 
+    def logging_request(self):
+        self.log.info('t_' + str(self.model.time_step) + '::EVENT::' + self.unique_id + '::request new unit to inventory')
 
+    def logging_install_start(self):
+        self.log.info('t_' + str(self.model.time_step) + '::EVENT::'+ self.unique_id + ':: start installing in ' + self.unique_id)
+        self.log.info('t_' + str(self.model.time_step) + '::EVENT:: it will finished at ' + str(self.unit_work_finish_step))
+
+    def logging_install_finish(self):
+        self.log.info(
+            't_' + str(self.model.time_step) + '::EVENT::' + self.unique_id + ':: install finish')
+
+    # step
     def step(self):
-        if not self.project_finished:
+        if not self.project_finished and self.project_started:
             self.work()
-            self.print_state()
+            # self.logging_state()
 

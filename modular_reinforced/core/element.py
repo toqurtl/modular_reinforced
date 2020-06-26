@@ -4,61 +4,28 @@ import logging
 import csv
 
 
-class UnitType(Enum):
-    # unit_type_name, duration
-    A = ('A', 5)
-    B = ('B', 10)
-
-    @classmethod
-    def get_type(cls, unit_type):
-        if unit_type == 'A':
-            return cls.A
-        elif unit_type == 'B':
-            return cls.B
-        else:
-            print('There is no enum equal to unit type' + unit_type)
-            return
-
-    @classmethod
-    def name(cls, unit_type_enum):
-        if unit_type_enum == cls.A:
-            return 'A'
-        elif unit_type_enum == cls.B:
-            return 'B'
-        else:
-            print('There is no enum equal to unit type_enum')
-            return
-
-
-class Location(Enum):
-    Factory = 0
-    Inventory = 1
-    Delivery = 2
-    Site = 3
-
-
 class Unit(Agent):
-    def __init__(self, unit_type_enum, model):
+    def __init__(self, model, **unit_info):
         unit_id = next(model.unit_id_generator)
         super().__init__(unit_id, model)
-        self.type = unit_type_enum
+        self.unit_type = unit_info.get("unit_type")
+        self.type_idx = unit_info.get("type_idx")
+        self.install_duration = unit_info.get("install_duration")
         self.site_working = True
         self.installed = False
-        self.location = Location.Factory
+        # self.location = Location.Factory
         self.install_start_step = 0
 
     def __str__(self):
-        type_name, _ = self.type.value
-        return self.unique_id +'('+type_name +')'
+        return self.unique_id +'('+str(self.type_idx) +')'
 
     @property
     def duration(self):
-        _, duration = self.type.value
-        return duration
+        return self.install_duration
 
     @property
     def install_finish_step(self):
-        return self.install_start_step + self.duration
+        return self.install_start_step + self.install_duration
 
     @property
     def remained_duration(self):

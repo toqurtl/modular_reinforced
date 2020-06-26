@@ -71,7 +71,8 @@ setup(
         'mesa',
         'networkx',
         'tensorflow',
-        'keras'
+        'keras',
+        'numpy'
         ],
 
     # List additional groups of dependencies here (e.g. development
