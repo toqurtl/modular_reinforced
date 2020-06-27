@@ -23,7 +23,6 @@ class FactoryAgent(Agent):
         unit = Unit(self.model, **type_info)
         self.model.inventory.add_unit(unit)
         # self.logging_production_finished(unit)
-        self.model.reward_at_time_step -= 1
 
     # Event register:
     def register_production(self, type_idx):

@@ -7,7 +7,7 @@ class TestEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
-        pass
+        self.action_list = []
 
     @property
     def action_size(self):
@@ -22,11 +22,13 @@ class TestEnv(gym.Env):
         self.model.reinforcement_env = True
 
     def step(self, action):
+        self.action_list.append(action)
         next_state, reward, done = self.model.next(action)
         return next_state, reward, done
 
     def reset(self):
         self.model.reset()
+        self.action_list.clear()
         return self.model.state()
 
     # def render(self, mode='human', close=False):

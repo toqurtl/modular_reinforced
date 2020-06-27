@@ -122,9 +122,9 @@ class SiteAgent(Agent):
         self.remained_unit_dict[self.working_unit.type_idx] -= 1
         self.units_in_the_site["install"].remove(self.working_unit)
         self.units_in_the_site["finish"].append(self.working_unit)
-        self.request_unit_type=0
+        self.request_unit_type = 0
         # self.logging_install_finish()
-        self.model.reward_at_time_step += 1
+        self.model.reward_at_time_step += 5
 
     # if is_working and finished, request another
     def work(self):

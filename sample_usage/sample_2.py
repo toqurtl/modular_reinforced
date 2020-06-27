@@ -1,10 +1,11 @@
-import gym
 import json
+import gym
 import os
 from config import Config
 from modular_reinforced.core.simulator import MesaModel
 from modular_reinforced.reinforcement.dqn import DQNAgent
 import numpy as np
+from matplotlib import pyplot as plt
 
 # import unit information for simulation
 with open("sample_data/unit_info.json", "r") as unit_info_file:
@@ -26,8 +27,9 @@ env = gym.make('test_env-v0')
 env.set_model(sample_model)
 agent = DQNAgent(env.state_size, env.action_size)
 
-EPISODES = 100
-scores, episodes = [], []
+EPISODES = 500
+score_list, finished_duration_list, inven_total_list, episodes = [], [], [], []
+action_list_list = []
 for e in range(EPISODES):
     done = False
     score = 0
@@ -41,21 +43,35 @@ for e in range(EPISODES):
         if len(agent.memory) >= agent.train_start:
             agent.train_model()
         state = next_state
-        # score += reward
+        score += reward
 
         if done:
             agent.update_target_model()
             finished_time_step = env.model.time_step
-
-            # score = score if score == 500 else score + 100
-
-            scores.append(score)
+            inven_total = env.model.inventory_total
+            score_list.append(score)
+            inven_total_list.append(inven_total)
+            finished_duration_list.append(finished_time_step)
             episodes.append(e)
-            print("episode:", e, "  finished:", finished_time_step, " inven_total", env.model.inventory_total,
-                  "  memory length:", len(agent.memory), "  epsilon:", agent.epsilon)
+            action_list_list.append(env.action_list)
+            # print("episode:", e, "  finished:", finished_time_step, " inven_total", inven_total,
+            #       "  memory length:", len(agent.memory), "  epsilon:", agent.epsilon)
+            print("episode:", e, "  finished:", finished_time_step, " inven_total", inven_total,
+                  "score", score)
+
 
             # if np.mean(scores[-min(10, len(scores)):]) > 490:
             #     agent.model.save_weights("./save_model/cartpole_dqn.h5")
             #     sys.exit()
+agent.model.save_weights("sample_model_weight.h5")
+plt.plot(episodes, score_list)
+plt.plot(episodes, finished_duration_list)
+plt.plot(episodes, inven_total_list)
+plt.show()
+plt.savefig("result.png")
+result = np.array([score_list, finished_duration_list, inven_total_list, episodes])
+action_result = np.array(action_list_list)
+np.savetxt("result.csv", result, delimiter=",")
+np.savetxt("result.csv", action_result, delimiter=",")
 
 

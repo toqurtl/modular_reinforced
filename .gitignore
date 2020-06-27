@@ -1,4 +1,5 @@
 /sample_data/*
+/experiment
 playground.py
 playground_reinforced.py
 sample_code.py

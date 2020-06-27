@@ -28,6 +28,8 @@ class InventoryAgent(Agent):
         for type_idx in self.model.unit_type_info_dict.keys():
             self.inventory[type_idx] = []
 
+        self.previous_reward_at_time_step = 0
+
     def reset(self):
         self.__set_inventory()
 
@@ -47,6 +49,10 @@ class InventoryAgent(Agent):
         for type_idx in self.inventory.keys():
             num_unit_list.append(len(self.inventory[type_idx]))
         return num_unit_list
+
+    @property
+    def reward_at_time_step(self):
+        return self.previous_reward_at_time_step - self.num_unit
 
     def get_unit(self, type_idx):
         if len(self.inventory[type_idx]) > 0:
@@ -70,7 +76,6 @@ class InventoryAgent(Agent):
             # self.logging_delivery_start(site, unit)
             self.inventory[type_idx].remove(unit)
             self.request_from_sites_list.remove(args)
-            self.model.reward_at_time_step += 1
             return
         else:
             return
@@ -111,6 +116,9 @@ class InventoryAgent(Agent):
         self.delivery()
         random.shuffle(self.request_from_sites_list)
         self.model.inventory_total += self.num_unit
+        self.model.reward_at_time_step += self.reward_at_time_step
+
+
         # self.logging_state()
 
 
