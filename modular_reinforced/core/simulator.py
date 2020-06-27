@@ -111,7 +111,7 @@ class MesaModel(Model):
             count = 1
         else:
             for site_agent in self.site_agent_list:
-                count += list(site_agent.unit_schedule.count(type_idx))
+                count += list(site_agent.unit_schedule).count(type_idx)
         return count
 
     def step(self):
