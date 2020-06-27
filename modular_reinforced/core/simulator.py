@@ -156,8 +156,11 @@ class MesaModel(Model):
             self.step()
             if self.episode_finished:
                 for site in self.site_agent_list:
-                    if site.remaining_planned_duration > 0:
+                    if 20 > site.remaining_planned_duration > 0:
                         self.reward_at_time_step += 1000
+                    elif 40 > site.remaining_planned_duration >= 20:
+                        self.reward_at_time_step += 2000
+
 
 
 
