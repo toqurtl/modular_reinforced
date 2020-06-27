@@ -24,7 +24,7 @@ class MesaModel(Model):
         self.unit_type_info_dict = {}
         self.site_agent_list = []
         self.__read_component_from_json()
-
+        self.target_num = {}
         # baseline for simulation
         self.inventory = InventoryAgent(self)
         self.factory = FactoryAgent(self)
@@ -105,6 +105,15 @@ class MesaModel(Model):
     def state_space(self):
         return
 
+    def get_remained_site_unit(self, type_idx):
+        count = 0
+        if type_idx == 0:
+            count = 1
+        else:
+            for site_agent in self.site_agent_list:
+                count += list(site_agent.unit_schedule.count(type_idx))
+        return count
+
     def step(self):
         self.reward_at_time_step = 0
         self.schedule.step()
@@ -119,17 +128,23 @@ class MesaModel(Model):
         return len(self.unit_type_info_dict.items()) + 1
 
     def state(self):
+        #TODO -
+        factory_state = [self.get_remained_site_unit(1), self.get_remained_site_unit(2)]
         inven_state = self.inventory.num_unit_per_type()
         site_state = []
         for site_agent in self.site_schedule.agents:
             site_state += site_agent.get_state()
-        state = inven_state + site_state
+        state = factory_state + inven_state + site_state
         return np.array(state)
 
     def next(self, action):
         # type_idx = randint(1,2)
         if self.reinforcement_env:
             self.factory.register_production(action)
+            self.factory.production_schedule.append(action)
+        if self.get_remained_site_unit(action) == 0:
+            self.reward_at_time_step -= 1000
+
         self.step()
         return self.state(), self.reward(), self.episode_finished
 
