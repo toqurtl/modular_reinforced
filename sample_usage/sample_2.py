@@ -7,15 +7,8 @@ from modular_reinforced.reinforcement.dqn import DQNAgent
 import numpy as np
 from matplotlib import pyplot as plt
 
-# import unit information for simulation
-with open("sample_data/unit_info.json", "r") as unit_info_file:
-    unit_type_info_dict = json.load(unit_info_file)
 
-# import site information for simulation
-with open("sample_data/site_info.json", "r") as site_info_file:
-    site_info_list = json.load(site_info_file).get("sites")
-
-abs_path = os.path.dirname(os.path.realpath(__file__))
+abs_path = os.path.dirname(os.path.realpath('.'))
 data_path = os.path.join(abs_path, "sample_data")
 cfg_file_path = os.path.join(data_path, "default.cfg")
 with open(cfg_file_path, 'r') as f:
@@ -27,9 +20,8 @@ env = gym.make('test_env-v0')
 env.set_model(sample_model)
 agent = DQNAgent(env.state_size, env.action_size)
 
-EPISODES = 500
+EPISODES = 1000
 score_list, finished_duration_list, inven_total_list, episodes = [], [], [], []
-action_list_list = []
 for e in range(EPISODES):
     done = False
     score = 0
@@ -53,11 +45,11 @@ for e in range(EPISODES):
             inven_total_list.append(inven_total)
             finished_duration_list.append(finished_time_step)
             episodes.append(e)
-            action_list_list.append(env.action_list)
             # print("episode:", e, "  finished:", finished_time_step, " inven_total", inven_total,
             #       "  memory length:", len(agent.memory), "  epsilon:", agent.epsilon)
             print("episode:", e, "  finished:", finished_time_step, " inven_total", inven_total,
                   "score", score)
+            print(env.action_list)
 
 
             # if np.mean(scores[-min(10, len(scores)):]) > 490:
@@ -70,8 +62,6 @@ plt.plot(episodes, inven_total_list)
 plt.show()
 plt.savefig("result.png")
 result = np.array([score_list, finished_duration_list, inven_total_list, episodes])
-action_result = np.array(action_list_list)
 np.savetxt("result.csv", result, delimiter=",")
-np.savetxt("result.csv", action_result, delimiter=",")
 
 
