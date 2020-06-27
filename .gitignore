@@ -1,6 +1,14 @@
-/sample_data/*
-/experiment
-playground.py
-playground_reinforced.py
-sample_code.py
+# basic
+/.idea
 *.egg-info
+
+# test code
+playground.py
+playground2.py
+playground_reinforced.py
+
+# experiment files in local
+/experiment
+*.csv
+*.png
+*.h5

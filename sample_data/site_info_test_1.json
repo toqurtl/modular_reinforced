@@ -1,0 +1,12 @@
+{
+  "sites": [
+    {
+      "site_id": "site_1",
+      "planned_duration": 100,
+      "start_time_step": 0,
+      "unit_schedule": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      "logistic_interval": 5,
+      "request_condition": 1
+    }
+  ]
+}
