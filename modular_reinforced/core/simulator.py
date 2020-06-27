@@ -31,6 +31,10 @@ class MesaModel(Model):
         self.reinforcement_env = False
         self.__initialize()
 
+        # save_result
+        self.inventory_result = []
+        self.site_result = []
+
     def __initialize(self):
         self.site_schedule = BaseScheduler(self)
         self.schedule = BaseScheduler(self)
@@ -139,4 +143,6 @@ class MesaModel(Model):
                 for site in self.site_agent_list:
                     if site.remaining_planned_duration > 0:
                         self.reward_at_time_step += 1000
+
+
 
