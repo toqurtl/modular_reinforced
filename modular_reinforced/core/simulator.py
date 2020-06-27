@@ -135,4 +135,8 @@ class MesaModel(Model):
     def simulate_episode(self):
         while not self.episode_finished:
             self.step()
+            if self.episode_finished:
+                for site in self.site_agent_list:
+                    if site.remaining_planned_duration > 0:
+                        self.reward_at_time_step += 1000
 
