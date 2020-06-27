@@ -46,9 +46,13 @@ class DQNAgent:
                         kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear',
                         kernel_initializer='he_uniform'))
-        model.summary()
+
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
+
+    def set_build_model(self, model):
+        self.model = model
+        self.target_model = model
 
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())

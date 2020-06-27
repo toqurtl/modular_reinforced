@@ -175,5 +175,9 @@ class SiteAgent(Agent):
     def step(self):
         if not self.project_finished and self.project_started:
             self.work()
+            if -50 < self.remaining_planned_duration < 0:
+                self.model.reward_at_time_step -= 10
+            elif self.remaining_planned_duration <= -50:
+                self.model.reward_at_time_step -=100
             # self.logging_state()
 
