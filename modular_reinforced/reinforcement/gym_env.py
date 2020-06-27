@@ -15,7 +15,8 @@ class TestEnv(gym.Env):
 
     @property
     def state_size(self):
-        return 18
+        return len(self.model.state())
+
 
     def set_model(self, model):
         self.model = model
