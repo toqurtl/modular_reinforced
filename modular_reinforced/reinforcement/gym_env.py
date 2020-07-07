@@ -28,7 +28,7 @@ class TestEnv(gym.Env):
         next_state, reward, done = self.model.next(action)
         return next_state, reward, done
 
-    def result_of_episode(self, action):
+    def result_of_episode(self):
         finished_time_step, inventory_total, score = self.model.time_step, self.model.inventory_total, self.score
         return finished_time_step, inventory_total, score
 
