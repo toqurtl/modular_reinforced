@@ -1,9 +1,8 @@
-import json
 import gym
 import os
 from config import Config
 from modular_reinforced.core.simulator import MesaModel
-from modular_reinforced.reinforcement.dqn import DQNAgent
+from modular_reinforced.reinforcement.framework.dqn import DQNAgent
 import numpy as np
 from matplotlib import pyplot as plt
 

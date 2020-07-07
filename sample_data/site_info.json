@@ -6,7 +6,9 @@
       "start_time_step": 0,
       "unit_schedule": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
       "logistic_interval": 5,
-      "request_condition": 1
+      "request_condition": 1,
+      "excavation": [],
+      "weather_probability": [],
     },
     {
       "site_id": "site_2",
@@ -14,7 +16,9 @@
       "start_time_step": 0,
       "unit_schedule": [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
       "logistic_interval": 5,
-      "request_condition": 1
+      "request_condition": 1,
+      "excavation": [],
+      "weather_probability": []
     },
     {
       "site_id": "site_3",
@@ -22,7 +26,9 @@
       "start_time_step": 0,
       "unit_schedule": [2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1],
       "logistic_interval": 5,
-      "request_condition": 1
+      "request_condition": 1,
+      "excavation": [],
+      "weather_probability": []
     },
     {
       "site_id": "site_4",
@@ -30,7 +36,9 @@
       "start_time_step": 0,
       "unit_schedule": [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
       "logistic_interval": 5,
-      "request_condition": 1
+      "request_condition": 1,
+      "excavation": [],
+      "weather_probability": []
     }
   ]
 }
