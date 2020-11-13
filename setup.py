@@ -69,7 +69,7 @@ setup(
         'pandas',
         'config',
         'mesa',
-        'tensorflow==1.15',
+        'tensorflow==2.3.1',
         'keras==2.3.1',
         'numpy',
         'gym',
